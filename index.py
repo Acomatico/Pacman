@@ -127,8 +127,9 @@ class Renderer:
         x,y = self.player_character.position
         player_coll = pygame.Rect(x, y, self.player_character.size, self.player_character.size)
         for idx, power_ball in enumerate(self.power_balls):
-            power_ball__coll = pygame.Rect(power_ball.position[0], power_ball.position[1], power_ball.size, power_ball.size)
-            if pygame.Rect.colliderect(player_coll, power_ball__coll):
+            ball_x, ball_y = power_ball.position
+            power_ball_coll = pygame.Rect(ball_x - power_ball.size // 2, ball_y - power_ball.size // 2, power_ball.size, power_ball.size)
+            if pygame.Rect.colliderect(player_coll, power_ball_coll):
                 self.set_power_mode()
                 del self.power_balls[idx]
 
@@ -136,13 +137,16 @@ class Renderer:
         x,y = self.player_character.position
         player_coll = pygame.Rect(x, y, self.player_character.size, self.player_character.size)
         for idx, point in enumerate(self.points):
-            point_coll = pygame.Rect(point.position[0], point.position[1], point.size, point.size)
+            point_coll = pygame.Rect(point.position[0] - point.size // 2, point.position[1] - point.size // 2, point.size, point.size)
             if pygame.Rect.colliderect(player_coll, point_coll):
                 del self.points[idx]
 
     def is_player_eaten(self):
         x,y = self.player_character.position
-        player_coll = pygame.Rect(x, y, self.player_character.size, self.player_character.size)
+        player_size = self.player_character.size
+        player_coll = pygame.Rect(x + player_size // 2, y + player_size // 2, 1, 1)
+
+        pygame.draw.rect(self.screen, (0,255,0), player_coll)
         for idx, ghost in enumerate(self.ghosts):
             ghost_coll = pygame.Rect(ghost.position[0], ghost.position[1], ghost.size, ghost.size)
             if pygame.Rect.colliderect(player_coll, ghost_coll):
