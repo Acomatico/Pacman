@@ -7,7 +7,6 @@ from models.movableObject import MovableObject
 class PlayerCharacter(MovableObject):
     def __init__(self, x, y, surface, size, color, renderer):
         super().__init__(x, y, surface, size, color, renderer)
-        renderer.add_player(self)
     
     def draw(self):
         x, y = self.position[0] + self.size // 2, self.position[1] + self.size // 2
