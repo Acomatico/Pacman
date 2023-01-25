@@ -1,10 +1,10 @@
-from cmath import pi
 from random import randrange
 import pygame
 import numpy
 
 from models.directions import Directions
 from models.movableObject import MovableObject
+from services.pathfinder import Pathfinder
 
 
 class Ghost(MovableObject):
@@ -33,32 +33,16 @@ class Ghost(MovableObject):
         if self.queued_movements:
             self.move(self.queued_movements.pop(0))
             return
-
         if self.renderer.is_power_mode_on() or self.time_random > pygame.time.get_ticks():
             self.move_random_direction()
         else:
             self.move_towards_player()
 
     def move_towards_player(self):
-        player_x, player_y = self.renderer.player_character.position
-        ghost_x, ghost_y = self.position
+        pathfinder = Pathfinder(self.renderer)
+        direction = pathfinder.shortest_path_to_player(self)[0]
 
-        x_diff = player_x - ghost_x
-        y_diff = ghost_y - player_y
-
-        angle = numpy.arctan2(y_diff, x_diff) * 180 / numpy.pi 
-        
-        direction = Directions.RIGHT
-
-        if angle > 45:
-            direction = Directions.UP
-        if angle > 135 or angle <= -135:
-            direction = Directions.LEFT
-        if angle > -135 and angle < - 45:
-            direction = Directions.DOWN
-        
-
-        if self.collides_with_wall(direction):
+        if direction == Directions.NONE or self.collides_with_wall(direction):
             self.move_random_direction()
             self.time_random = 5 * self.size + pygame.time.get_ticks()
             return

@@ -7,21 +7,14 @@ from models.powerBall import PowerBall
 from models.wall import Wall
 from models.point import Point
 
-class Controller:
-    def __init__(self, maze_matrix) -> None:
-        self.maze_matrix = maze_matrix
-        self.point_spaces = []
-        self.reachable_spaces = []
-        self.ghosts_spaces = []
-        self.size = (0,0)
-
 
 class Renderer:
-    def __init__(self, width, height) -> None:
+    def __init__(self, width, height, matrix) -> None:
         pygame.init()
 
         self.width = width
         self.height = height
+        self.maze_matrix = matrix
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.objects = []
         self.clock = pygame.time.Clock()
@@ -146,7 +139,6 @@ class Renderer:
         player_size = self.player_character.size
         player_coll = pygame.Rect(x + player_size // 2, y + player_size // 2, 1, 1)
 
-        pygame.draw.rect(self.screen, (0,255,0), player_coll)
         for idx, ghost in enumerate(self.ghosts):
             ghost_coll = pygame.Rect(ghost.position[0], ghost.position[1], ghost.size, ghost.size)
             if pygame.Rect.colliderect(player_coll, ghost_coll):
@@ -172,7 +164,7 @@ matrix = [
     [0,0,1,0,0,4,4,4,0,0,1,0,0],
     [0,0,1,0,0,4,4,4,0,0,1,0,0],
     [0,1,1,0,0,4,4,4,0,0,1,1,0],
-    [1,1,0,0,0,0,2,0,0,0,0,1,1],
+    [1,1,0,0,0,0,1,0,0,0,0,1,1],
     [0,1,0,1,1,1,1,1,1,1,0,1,0],
     [0,1,0,0,0,0,1,0,0,0,0,1,0],
     [0,5,1,1,1,1,3,1,1,1,1,5,0],
@@ -184,25 +176,24 @@ if __name__ == "__main__":
     character_size = size * 80 // 100
     point_size = size * 20 // 100
     power_ball_size = size * 50 // 100
-    renderer = Renderer(size * len(matrix[0]), size * len(matrix))
-    game = Controller(matrix)
-    ghost_colors = [(255,0,0), (0,120,250), (255,0,250)]
+    renderer = Renderer(size * len(matrix), size * len(matrix[0]), matrix)
+    ghost_colors = [(255,0,0), (0,200,100), (120,120,0 )]
 
     for i in range(len(matrix)):
         row = matrix[i]
         for j in range(len(row)):
             value = row[j]
             if value == 0:
-                renderer.add_wall(Wall(j*size, i*size, renderer.screen, size, (0,0,180)))
+                renderer.add_wall(Wall(i*size, j*size, renderer.screen, size, (0,0,180)))
             if value == 1:
-                renderer.add_point(Point(size//2+j*size, size//2+i*size, renderer.screen, point_size, (200,200,0)))
+                renderer.add_point(Point(size//2+i*size, size//2+j*size, renderer.screen, point_size, (200,200,0)))
             if value == 2:
-                renderer.add_wall_with_timeout(Wall(j*size, i*size, renderer.screen, size, (0,0,180)), 3000)
+                renderer.add_wall_with_timeout(Wall(i*size, j*size, renderer.screen, size, (0,0,180)), 3000)
             if value == 4 and ghost_colors:
                 ghost_color = ghost_colors.pop()
-                renderer.add_ghost(Ghost(j*size, i*size, renderer.screen, size, ghost_color, renderer))
+                renderer.add_ghost(Ghost(i*size, j*size, renderer.screen, size, ghost_color, renderer))
             if value == 3:
-                renderer.add_player(PlayerCharacter(j*size, i*size, renderer.screen, character_size, (255,255,0), renderer))
+                renderer.add_player(PlayerCharacter(i*size, j*size, renderer.screen, character_size, (255,255,0), renderer))
             if value == 5:
-                renderer.add_power_ball(PowerBall(size//2+j*size, size//2+i*size, renderer.screen, power_ball_size, (200,200,0)))
-    renderer.tick(100)
+                renderer.add_power_ball(PowerBall(size//2+i*size, size//2+j*size, renderer.screen, power_ball_size, (200,200,0)))
+    renderer.tick(180)
